@@ -9,15 +9,6 @@ export async function findCredentialByEmail(email) {
 }
 
 export async function updatePassword(email, hashedPassword) {
-    const result = await pool.query(query, [hashedPassword, email]);
-
-    if (result.rowCount === 0) {
-        throw new AppError(
-            404,
-            "Credential record not found."
-        );
-    }
-
     const query = `
         UPDATE credentials
         SET
@@ -26,7 +17,25 @@ export async function updatePassword(email, hashedPassword) {
         WHERE email = $2
     `;
 
-    await pool.query(query, [password, email]);
+    const result = await pool.query(query, [hashedPassword, email]);
+
+    if (result.rowCount === 0) {
+        throw new AppError(404, "User not found");
+    }
+
+    return result;
+}
+
+export async function getPasswordHash(email) {
+    const query = `
+        SELECT password
+        FROM credentials
+        WHERE email = $1
+    `;
+
+    const result = await pool.query(query, [email]);
+
+    return result.rows[0]?.password;
 }
 
 export async function markPasswordResetComplete(email) {

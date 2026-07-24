@@ -42,9 +42,9 @@ async function seed() {
  
         await client.query("COMMIT");
         console.log(`\nDone. Temp password for all seeded users: ${TEMP_PASSWORD}`);
-    } catch (err) {
+    } catch (error) {
         await client.query("ROLLBACK");
-        console.error("Seed failed, rolled back:", err.message);
+        console.error("Seed failed, rolled back:", error.message);
     } finally {
         client.release();
         await pool.end();

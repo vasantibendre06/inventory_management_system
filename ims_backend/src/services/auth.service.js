@@ -1,5 +1,5 @@
 import bcrypt from "bcrypt";
-import { findCredentialByEmail } from "../repository/credential.repository.js";
+import { findCredentialByEmail, updatePassword, getPasswordHash } from "../repository/credential.repository.js";
 import { findUserByEmail, touchLastLogin } from "../repository/user.repository.js";
 import generateLoginToken from "../utils/jwt/loginToken.js";
 import generateResetToken from "../utils/jwt/resetToken.js";
@@ -56,8 +56,6 @@ export async function loginUser(email, password) {
     await touchLastLogin(email);
     const token = generateLoginToken(user);
 
-    //console.log("Generated token:", token);
-
     return {
         mustResetPassword: false,
         token,
@@ -66,9 +64,18 @@ export async function loginUser(email, password) {
 }
 
 export async function resetPasswordService(email, newPassword) {
-    validatePassword(password);
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    validatePassword(newPassword);
 
-    await updatePassword (email, hashedPassword);
+    const currentHash = await getPasswordHash(email);
+
+    const isSamePassword = await bcrypt.compare(newPassword, currentHash);
+
+    if (isSamePassword) {
+        throw new AppError(400, "New password must be different from the current password.");
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    await updatePassword(email, hashedPassword);
 }

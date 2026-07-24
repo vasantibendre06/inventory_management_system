@@ -78,11 +78,11 @@ export async function resetPassword(req, res) {
         });
 
     } catch (error) {
-        const statusCode = err.statusCode || 500;
+        const statusCode = error.statusCode || 500;
 
         return res.status(statusCode).json({
             success: false,
-            message: err.message || "Something went wrong."
+            message: error.message || "Something went wrong."
         });
     }
 }
