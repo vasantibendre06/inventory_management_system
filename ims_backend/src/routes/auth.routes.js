@@ -1,7 +1,8 @@
 import express from "express";
-import { login, resetPassword } from "../controllers/auth.controller.js";
+import { login, logout, resetPassword } from "../controllers/auth.controller.js";
 import verifyLoginToken from "../middleware/verifyLoginToken.js";
 import verifyResetToken from "../middleware/verifyResetToken.js";
+import {activateAccount} from "../controllers/auth.controller.js"
 
 const router = express.Router();
 
@@ -16,4 +17,12 @@ router.get("/me", verifyLoginToken, (req, res) => {
 
 router.post( "/reset-password", verifyResetToken, resetPassword );
 
+router.post("/activate-account", activateAccount);
+
+router.post("/logout", logout);
+
 export default router;
+
+// GET  /auth/verify-password-token
+
+// POST /auth/set-password

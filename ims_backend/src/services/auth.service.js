@@ -1,59 +1,76 @@
 import bcrypt from "bcrypt";
 import { findCredentialByEmail, updatePassword, getPasswordHash } from "../repository/credential.repository.js";
-import { findUserByEmail, touchLastLogin } from "../repository/user.repository.js";
+import { findUserByEmail, touchLastLogin, savePasswordToken, getPasswordToken, clearPasswordToken  } from "../repository/user.repository.js";
 import generateLoginToken from "../utils/jwt/loginToken.js";
-import generateResetToken from "../utils/jwt/resetToken.js";
+import { generateOtp, hashOtp, verifyOtp } from "../utils/otp.js";
+import { PASSWORD_TOKEN_TYPE, AUTH } from "../constants/auth.constants.js";
 import {validatePassword} from "../utils/validators/password.validator.js"
-import {AUTH} from "../constants/auth.constants.js";
 import {AppError} from "../utils/AppError.js";
+import { sendOtpEmail } from "./email.service.js";
 
 const ALLOWED_DOMAIN = AUTH.COMPANY_DOMAIN
 
 export async function loginUser(email, password) {
-    // 1. Domain restriction — reject before even touching the DB
-    if (!email.toLowerCase().endsWith(ALLOWED_DOMAIN)) {
-        throw new AppError(403, "Only company email addresses are allowed to log in.");
-    }
+    // 1. Domain restriction (enable in production)
+    // if (!email.toLowerCase().endsWith(ALLOWED_DOMAIN)) {
+    //     throw new AppError(
+    //         403,
+    //         "Only company email addresses are allowed to log in."
+    //     );
+    // }
 
-    // 2. Look up the credential record
+    // 2. Find credentials
     const credential = await findCredentialByEmail(email);
-    console.log("Credential from DB:", credential);
-
-    console.log(
-        "Type:",
-        typeof credential.must_reset_password,
-        "Value:",
-        credential.must_reset_password
-    );
 
     if (!credential) {
         throw new AppError(401, "Invalid email or password.");
     }
 
-    // 3. Verify password against the stored bcrypt hash
-    const isMatch = await bcrypt.compare(password, credential.password);
+    // 3. First-time login → Skip password verification
+    if (credential.must_reset_password) {
+        const otp = generateOtp();
+        const otpHash = hashOtp(otp);
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+        await savePasswordToken(
+            email,
+            otpHash,
+            expiresAt,
+            PASSWORD_TOKEN_TYPE.ACTIVATION
+        );
+
+        await sendOtpEmail(email, otp);
+
+        return {
+            mustResetPassword: true,
+            email,
+        };
+    }
+
+    // 4. Normal login → Verify password
+    const isMatch = await bcrypt.compare(
+        password,
+        credential.password
+    );
+
     if (!isMatch) {
         throw new AppError(401, "Invalid email or password.");
     }
 
-    // 4. First Login
-    if (credential.must_reset_password) {
-
-        const resetToken = generateResetToken(email);
-
-        return {
-            mustResetPassword: true,
-            resetToken,
-        };
-    }
-
-    // 5. Normal login — issue the real session
+    // 5. Get user
     const user = await findUserByEmail(email);
+
     if (!user) {
-        throw new AppError(500, "Credential exists but no matching user profile was found.");
+        throw new AppError(
+            500,
+            "Credential exists but no matching user profile was found."
+        );
     }
 
+    // 6. Update last login
     await touchLastLogin(email);
+
+    // 7. Generate JWT
     const token = generateLoginToken(user);
 
     return {
@@ -62,6 +79,8 @@ export async function loginUser(email, password) {
         user,
     };
 }
+
+
 
 export async function resetPasswordService(email, newPassword) {
 
@@ -78,4 +97,107 @@ export async function resetPasswordService(email, newPassword) {
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
     await updatePassword(email, hashedPassword);
+}
+
+
+
+export async function activateAccountService(
+    email,
+    otp,
+    newPassword,
+    confirmPassword
+) {
+    // Validate input
+    if (!email || !otp || !newPassword || !confirmPassword) {
+        throw new AppError(400, "All fields are required.");
+    }
+
+    if (newPassword !== confirmPassword) {
+        throw new AppError(400, "Passwords do not match.");
+    }
+
+    validatePassword(newPassword);
+
+    // Find credentials
+    const credential = await findCredentialByEmail(email);
+
+    if (!credential) {
+        throw new AppError(404, "Account not found.");
+    }
+
+    if (!credential.must_reset_password) {
+        throw new AppError(400, "Account is already activated.");
+    }
+
+    // Fetch stored OTP
+    const passwordToken = await getPasswordToken(email);
+
+    if (!passwordToken) {
+        throw new AppError(400, "OTP not found.");
+    }
+
+    if (
+        passwordToken.password_token_type !==
+        PASSWORD_TOKEN_TYPE.ACTIVATION
+    ) {
+        throw new AppError(400, "Invalid OTP.");
+    }
+
+    if (
+        passwordToken.password_token_expires_at &&
+        passwordToken.password_token_expires_at < new Date()
+    ) {
+        throw new AppError(400, "OTP has expired.");
+    }
+
+    // Verify OTP
+    const isValidOtp = verifyOtp(
+        otp,
+        passwordToken.password_token_hash
+    );
+
+    if (!isValidOtp) {
+        throw new AppError(400, "Incorrect OTP.");
+    }
+
+    // Hash new password
+    const hashedPassword = await bcrypt.hash(newPassword, 12);
+
+    // Update password
+    const updated = await updatePassword(
+        email,
+        hashedPassword
+    );
+
+    if (!updated) {
+        throw new AppError(
+            500,
+            "Failed to activate account."
+        );
+    }
+
+    // Clear OTP
+    await clearPasswordToken(email);
+
+    // Update last login
+    await touchLastLogin(email);
+
+    // Fetch user
+    const user = await findUserByEmail(email);
+
+    if (!user) {
+        throw new AppError(
+            500,
+            "User profile not found."
+        );
+    }
+
+    // Generate login JWT
+    const token = generateLoginToken(user);
+
+    return {
+        token,
+        user,
+        message: "Account activated successfully.",
+    };
 }

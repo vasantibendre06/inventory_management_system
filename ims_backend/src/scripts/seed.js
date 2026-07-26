@@ -8,6 +8,7 @@ const dummyUsers = [
     { emp_id: "A01", name: "Ashwin Bendre",  email: "ashwin.bendre@winrender.com",  role_code: "ADM" },
     { emp_id: "E01", name: "Vasanti Bendre",  email: "vasanti.bendre@winrender.com",  role_code: "EMP" },
     { emp_id: "S01", name: "Lata Bendre", email: "lata.bendre@winrender.com", role_code: "STF" },
+    { emp_id: "E01", name: "Vasanti Ashwin Bendre",  email: "vasanti.bendre28@gmail.com",  role_code: "EMP" },
 ];
  
 async function seed() {

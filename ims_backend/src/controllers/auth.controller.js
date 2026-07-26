@@ -1,4 +1,4 @@
-import { loginUser, resetPasswordService } from "../services/auth.service.js";
+import { loginUser, resetPasswordService, activateAccountService } from "../services/auth.service.js";
 import {loginCookieOptions, resetCookieOptions} from "../config/cookieOptions.js";
 
 export async function login(req, res) {
@@ -46,6 +46,8 @@ export async function login(req, res) {
     }
 }
 
+
+
 export async function resetPassword(req, res) {
     try {
         const { newPassword, confirmPassword } = req.body;
@@ -86,3 +88,52 @@ export async function resetPassword(req, res) {
         });
     }
 }
+
+
+
+export async function activateAccount(req, res) {
+    try {
+        const {
+            email,
+            otp,
+            newPassword,
+            confirmPassword,
+        } = req.body;
+
+        const {
+            token,
+            user,
+            message,
+        } = await activateAccountService(
+            email,
+            otp,
+            newPassword,
+            confirmPassword
+        );
+
+        res.cookie("token", token, loginCookieOptions);
+
+        return res.status(200).json({
+            success: true,
+            message,
+            user,
+        });
+
+    } catch (error) {
+        return res.status(400).json({
+            success: false,
+            message: error.message,
+        });
+    }
+}
+
+
+
+export const logout = (req, res) => {
+    res.clearCookie("token", loginCookieOptions);
+
+    return res.status(200).json({
+        success: true,
+        message: "Logged out successfully.",
+    });
+};
