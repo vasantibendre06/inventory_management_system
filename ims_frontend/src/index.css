@@ -1,0 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600&display=swap');
+
+@import "tailwindcss";
+
+@theme {
+  /* Brand colors — generates bg-brand-navy, text-brand-navy, border-brand-navy, etc. automatically */
+  --color-brand-navy: #094179;
+  --color-brand-primary: #0e4f8f;
+  --color-brand-steel: #20538c;
+  --color-brand-deep: #00407d;
+  --color-brand-ink: #12203a;
+  --color-brand-bg: #f4f6fa;
+  --color-brand-border: #dfe4ec;
+
+  /* Fonts — generates font-archivo, font-inter */
+  --font-archivo: "Archivo", sans-serif;
+  --font-inter: "Inter", sans-serif;
+}

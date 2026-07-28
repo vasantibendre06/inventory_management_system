@@ -1,0 +1,39 @@
+.activation-page {
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: #f5f7fb;
+}
+
+.activation-card {
+    width: 400px;
+    padding: 32px;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+}
+
+.activation-card h2 {
+    margin-bottom: 12px;
+}
+
+.activation-card p {
+    margin-bottom: 24px;
+    color: #666;
+}
+
+.activation-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.activation-card input {
+    padding: 12px;
+}
+
+.activation-card button {
+    padding: 12px;
+    cursor: pointer;
+}

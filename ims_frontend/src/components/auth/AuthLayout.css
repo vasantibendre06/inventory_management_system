@@ -1,0 +1,743 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+
+/* ==========================================================
+   Design Tokens
+========================================================== */
+
+:root {
+    --color-primary: #094179;
+    --color-primary-hover: #0E4F8F;
+    --color-secondary: #20538C;
+    --color-accent: #00407D;
+
+    --color-text: #12203A;
+    --color-white: #FFFFFF;
+    --color-background: #F4F6FA;
+    --color-border: #DFE4EC;
+
+    --font-display: "Archivo", sans-serif;
+    --font-body: "Inter", sans-serif;
+
+    --radius: 14px;
+    --transition: 220ms ease;
+}
+
+/* ==========================================================
+   Reset
+========================================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+}
+
+/* ==========================================================
+   Page Layout
+========================================================== */
+
+.auth-page {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+    background: var(--color-background);
+    font-family: var(--font-body);
+}
+
+/* ==========================================================
+   LEFT PANEL
+========================================================== */
+
+.auth-visual {
+    position: relative;
+    flex: 1;
+    overflow: hidden;
+
+    background:
+        url("/metal_detector.png")
+        center center /
+        contain
+        no-repeat;
+
+    background-color: var(--color-primary);
+}
+
+/* blue overlay */
+
+.auth-visual__overlay {
+
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(9,65,121,.90),
+            rgba(14,79,143,.82),
+            rgba(0,64,125,.90)
+        );
+
+    z-index: 1;
+}
+
+@keyframes gridMove {
+
+    from {
+
+        transform: translateY(0);
+    }
+
+    to {
+
+        transform: translateY(42px);
+    }
+}
+
+/* moving scan line */
+
+.auth-visual__scanline {
+
+    position: absolute;
+
+    left: 0;
+
+    right: 0;
+
+    height: 2px;
+
+    z-index: 3;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.9),
+            transparent
+        );
+
+    box-shadow:
+         0 0 12px rgba(255,255,255,.55);
+
+    animation: scanLine 6s ease-in-out infinite;
+}
+
+@keyframes scanLine {
+
+    0% {
+
+        top: 8%;
+        opacity: 0;
+    }
+
+    10% {
+
+        opacity: 1;
+    }
+
+    50% {
+
+        top: 92%;
+        opacity: 1;
+    }
+
+    60% {
+
+        opacity: 0;
+    }
+
+    100% {
+
+        top: 8%;
+        opacity: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    .auth-visual__scanline,
+    .auth-visual__grid {
+
+        animation: none;
+    }
+}
+
+/* content */
+
+.auth-visual__content {
+
+    position: relative;
+
+    z-index: 5;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: flex-end;
+
+    height: 100%;
+
+    padding: 72px;
+}
+
+.auth-visual__title {
+    font-family: "Archivo", sans-serif;
+
+    font-size: clamp(2.8rem, 4vw, 4rem);
+
+    font-weight: 700;
+
+    line-height: 1.08;
+
+    letter-spacing: -.03em;
+
+    color: rgba(255,255,255,.92);
+
+    margin-bottom: 20px;
+
+    text-shadow:
+        0 2px 8px rgba(0,0,0,.25);
+}
+
+.auth-visual__caption {
+    max-width: 500px;
+
+    font-family: "Inter", sans-serif;
+
+    font-size: 16px;
+
+    line-height: 1.75;
+
+    color: rgba(255,255,255,.75);
+
+    opacity: 10;
+
+    margin-bottom: 25px;
+}
+
+/* feature list */
+
+.auth-visual__features {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 16px;
+}
+
+.auth-feature {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    font-size: 15px;
+
+    color: rgba(255, 255, 255, .92);
+}
+
+.auth-feature__check {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    width: 26px;
+
+    height: 26px;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,.15);
+
+    font-size: 14px;
+
+    font-weight: bold;
+}
+
+/* ==========================================================
+   RIGHT PANEL
+========================================================== */
+
+.auth-form-panel {
+
+    flex: 1;
+
+    display: flex;
+
+    flex-direction: column;
+
+    justify-content: center;
+
+    align-items: center;
+
+    padding: 48px;
+}
+
+/* logo */
+
+.company-logo {
+
+    display: flex;
+
+    justify-content: center;
+
+    margin-bottom: 34px;
+
+    width: 100%;
+}
+
+.company-logo img {
+
+    width: clamp(190px, 18vw, 290px);
+
+    height: auto;
+}
+
+/* ==========================================================
+   Shared Card
+========================================================== */
+
+.auth-card {
+
+    width: min(100%, 460px);
+
+    background: rgba(255,255,255,.97);
+
+    backdrop-filter: blur(14px);
+
+    border-radius: 18px;
+
+    padding: 42px;
+
+    box-shadow:
+        0 18px 60px rgba(0,0,0,.12);
+
+    border: 1px solid rgba(255,255,255,.45);
+
+    animation: fadeUp .35s ease;
+}
+
+@keyframes fadeUp {
+
+    from {
+
+        opacity: 0;
+
+        transform: translateY(20px);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform: translateY(0);
+    }
+}
+
+.auth-title {
+
+    font-family: var(--font-display);
+
+    font-size: 30px;
+
+    font-weight: 700;
+
+    color: var(--color-text);
+
+    margin-bottom: 8px;
+}
+
+.auth-subtitle {
+
+    margin-bottom: 34px;
+
+    font-family: "Inter", sans-serif;
+
+    color: #6B7280;
+
+    line-height: 1.6;
+
+    font-size: 15px;
+}
+
+/* ==========================================================
+   Mobile
+========================================================== */
+
+@media (max-width:900px) {
+
+    .auth-page {
+
+        position: relative;
+
+        justify-content: center;
+
+        align-items: center;
+
+        padding: 22px;
+
+        background:
+            url("/metal_detector.png")
+            center center /
+            cover
+            no-repeat;
+    }
+
+    .auth-page::before {
+
+        content: "";
+
+        position: absolute;
+
+        inset: 0;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(9,65,121,.92),
+                rgba(14,79,143,.82)
+            );
+    }
+
+    .auth-visual {
+
+        display: none;
+    }
+
+    .auth-form-panel {
+
+        position: relative;
+
+        z-index: 10;
+
+        width: 100%;
+
+        padding: 0;
+    }
+
+    .company-logo {
+
+        margin-bottom: 24px;
+    }
+
+    .company-logo img {
+
+        width: min(220px, 60vw);
+    }
+
+    .auth-card {
+
+        max-width: 420px;
+
+        width: 100%;
+
+        padding: 32px 26px;
+
+        border-radius: 16px;
+    }
+
+    .auth-title {
+
+        font-size: 26px;
+    }
+
+    .auth-subtitle {
+
+        font-size: 14px;
+    }
+}
+
+/* ==========================================================
+   Small Phones
+========================================================== */
+
+@media (max-width:420px) {
+
+    .auth-page {
+
+        padding: 16px;
+    }
+
+    .company-logo img {
+
+        width: 180px;
+    }
+
+    .auth-card {
+
+        padding: 26px 22px;
+    }
+
+    .auth-title {
+
+        font-size: 24px;
+    }
+}
+
+/* ==========================================================
+   Shared Input
+========================================================== */
+
+.auth-field {
+    margin-bottom: 20px;
+}
+
+.auth-field__label {
+    display: block;
+    margin-bottom: 8px;
+
+    font-size: 13px;
+    font-weight: 600;
+
+    color: var(--color-text);
+}
+
+.auth-input {
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+
+    background: var(--color-background);
+
+    border: 1px solid var(--color-border);
+
+    border-radius: 10px;
+
+    transition: all var(--transition);
+}
+
+.auth-input:focus-within {
+    background: white;
+
+    border-color: var(--color-primary-hover);
+
+    box-shadow: 0 0 0 3px rgba(14, 79, 143, .15);
+}
+
+.auth-input__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding-left: 14px;
+
+    color: var(--color-primary);
+}
+
+.auth-input__control {
+    flex: 1;
+
+    border: none;
+    outline: none;
+
+    background: transparent;
+
+    padding: 14px 16px;
+
+    font-family: var(--font-body);
+
+    font-size: 14px;
+
+    color: var(--color-text);
+}
+
+.auth-input__control::placeholder {
+    color: #98A3B3;
+}
+
+.auth-input--error {
+    border-color: #DC2626;
+}
+
+.auth-field__error {
+    margin-top: 6px;
+
+    color: #DC2626;
+
+    font-size: 12px;
+}
+
+/* ==========================================================
+   Password Input
+========================================================== */
+
+.auth-input__toggle {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    border: none;
+
+    outline: none;
+
+    background: transparent;
+
+    cursor: pointer;
+
+    padding: 0 14px;
+
+    color: var(--color-primary);
+
+    transition: color var(--transition);
+}
+
+.auth-input__toggle:hover {
+
+    color: var(--color-primary-hover);
+}
+
+.auth-input__toggle:focus-visible {
+
+    outline: none;
+}
+
+/* ==========================================================
+   Auth Button
+========================================================== */
+
+.auth-button {
+
+    width: 100%;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding: 14px 18px;
+
+    border: none;
+
+    border-radius: 10px;
+
+    cursor: pointer;
+
+    background: var(--color-primary);
+
+    color: var(--color-white);
+
+    font-family: var(--font-display);
+
+    font-size: 15px;
+
+    font-weight: 600;
+
+    letter-spacing: .02em;
+
+    transition:
+        background var(--transition),
+        transform var(--transition),
+        box-shadow var(--transition);
+}
+
+.auth-button:hover:not(:disabled) {
+
+    background: var(--color-primary-hover);
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 10px 24px rgba(9,65,121,.25);
+}
+
+.auth-button:active:not(:disabled) {
+
+    transform: translateY(0);
+}
+
+.auth-button:disabled {
+
+    opacity: .75;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+.auth-button:focus-visible {
+
+    outline: 3px solid rgba(14,79,143,.25);
+
+    outline-offset: 3px;
+}
+
+/* Spinner */
+
+.auth-button__spinner {
+
+    animation: auth-spin .9s linear infinite;
+}
+
+@keyframes auth-spin {
+
+    from {
+
+        transform: rotate(0deg);
+    }
+
+    to {
+
+        transform: rotate(360deg);
+    }
+}
+
+/* ==========================================================
+   Forgot Password
+========================================================== */
+
+.auth-link {
+
+    background: none;
+
+    border: none;
+
+    padding: 0;
+
+    margin: 6px 0 20px;
+
+    align-self: flex-end;
+
+    font-size: 14px;
+
+    font-weight: 500;
+
+    color: var(--color-primary);
+
+    cursor: pointer;
+
+    transition: color .2s ease;
+}
+
+.auth-link:hover {
+
+    color: var(--color-primary-hover);
+
+    text-decoration: underline;
+}
+
+.auth-link:focus-visible {
+
+    outline: none;
+
+    text-decoration: underline;
+}

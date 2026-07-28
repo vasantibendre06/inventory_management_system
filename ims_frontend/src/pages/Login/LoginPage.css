@@ -1,0 +1,572 @@
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,600;0,700;1,600&family=Inter:wght@400;500;600&display=swap');
+
+/* ==========================================================
+   Design Tokens
+========================================================== */
+
+:root {
+    --color-navy-deepest: #094179;
+    --color-navy-primary: #0E4F8F;
+    --color-blue-steel: #20538C;
+    --color-blue-deep: #00407D;
+
+    --color-ink: #12203A;
+    --color-white: #FFFFFF;
+    --color-bg-soft: #F4F6FA;
+    --color-border: #DFE4EC;
+
+    --font-display: "Archivo", sans-serif;
+    --font-body: "Inter", sans-serif;
+
+    --radius: 10px;
+    --transition: .2s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+}
+
+/* ==========================================================
+   Layout
+========================================================== */
+
+.login-page {
+    display: flex;
+    min-height: 100vh;
+    background: var(--color-bg-soft);
+    font-family: var(--font-body);
+}
+
+/* ==========================================================
+   LEFT PANEL
+========================================================== */
+
+.login-visual {
+    position: relative;
+    flex: 1 1 45%;
+    overflow: hidden;
+
+    background:
+        url("/metal_detector.png")
+        center center / contain
+        no-repeat;
+
+    background-color: var(--color-navy-deepest);
+}
+
+.login-visual__overlay {
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            160deg,
+            rgba(9,65,121,.90),
+            rgba(14,79,143,.82),
+            rgba(0,64,125,.90)
+        );
+}
+
+.login-visual::after {
+
+    content: "";
+
+    position: absolute;
+
+    inset: 18px;
+
+    border: 1px solid rgba(255,255,255,.18);
+
+    pointer-events: none;
+}
+
+.login-visual__scanline {
+
+    position: absolute;
+
+    left: 0;
+
+    right: 0;
+
+    height: 2px;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent,
+            rgba(255,255,255,.9),
+            transparent
+        );
+
+    box-shadow:
+        0 0 12px rgba(255,255,255,.55);
+
+    animation: scan-sweep 6s ease-in-out infinite;
+
+    z-index: 1;
+}
+
+@keyframes scan-sweep {
+
+    0% {
+        top:8%;
+        opacity:0;
+    }
+
+    10% {
+        opacity:1;
+    }
+
+    50% {
+        top:92%;
+        opacity:1;
+    }
+
+    60% {
+        opacity:0;
+    }
+
+    100% {
+        top:8%;
+        opacity:0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce){
+
+    .login-visual__scanline{
+        display:none;
+        animation:none;
+    }
+}
+
+.login-visual__content {
+
+    position: relative;
+
+    z-index:2;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:flex-end;
+
+    height:100%;
+
+    padding:56px;
+}
+
+.login-visual__title{
+
+    font-family:var(--font-display);
+
+    font-size:clamp(2rem,3vw,2.6rem);
+
+    color:white;
+
+    line-height:1.2;
+
+    margin-bottom:18px;
+}
+
+.login-visual__caption{
+
+    max-width:420px;
+
+    color:rgba(255,255,255,.85);
+
+    line-height:1.7;
+
+    font-size:15px;
+}
+
+/* ==========================================================
+   RIGHT PANEL
+========================================================== */
+
+.login-form-panel{
+
+    flex:1;
+
+    display:flex;
+
+    flex-direction:column;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:48px 32px;
+}
+
+.company-logo{
+
+    display:flex;
+
+    justify-content:center;
+
+    margin-bottom:32px;
+
+    width:100%;
+}
+
+.company-logo img{
+
+    width:clamp(180px,18vw,300px);
+
+    height:auto;
+}
+
+/* ==========================================================
+   CARD
+========================================================== */
+
+.login-card{
+
+    width:100%;
+
+    max-width:420px;
+
+    background:white;
+
+    border:1px solid var(--color-border);
+
+    border-radius:14px;
+
+    padding:42px;
+
+    box-shadow:
+        0 18px 40px rgba(9,65,121,.15);
+
+    animation:fadeUp .35s ease;
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:translateY(18px);
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:none;
+    }
+}
+
+.login-card__heading{
+
+    font-family:var(--font-display);
+
+    font-size:28px;
+
+    color:var(--color-ink);
+
+    margin-bottom:6px;
+}
+
+.login-card__subheading{
+
+    color:#66768A;
+
+    font-size:14px;
+
+    margin-bottom:28px;
+}
+
+/* ==========================================================
+   FORM
+========================================================== */
+
+.login-field{
+
+    display:block;
+
+    margin-bottom:18px;
+}
+
+.login-field input{
+
+    width:100%;
+
+    padding:14px 16px;
+
+    border-radius:10px;
+
+    border:1px solid var(--color-border);
+
+    background:var(--color-bg-soft);
+
+    font-size:14px;
+
+    transition:all var(--transition);
+
+    outline:none;
+}
+
+.login-field input::placeholder{
+
+    color:#96A2B2;
+}
+
+.login-field input:focus{
+
+    background:white;
+
+    border-color:var(--color-navy-primary);
+
+    box-shadow:
+        0 0 0 3px rgba(14,79,143,.15);
+}
+
+/* ==========================================================
+   LINKS
+========================================================== */
+
+.login-card__forgot-btn{
+
+    border:none;
+
+    background:none;
+
+    color:var(--color-navy-primary);
+
+    font-size:13px;
+
+    cursor:pointer;
+
+    margin-bottom:22px;
+
+    transition:var(--transition);
+}
+
+.login-card__forgot-btn:hover{
+
+    text-decoration:underline;
+}
+
+/* ==========================================================
+   BUTTON
+========================================================== */
+
+.login-card__submit{
+
+    width:100%;
+
+    border:none;
+
+    border-radius:10px;
+
+    padding:14px;
+
+    cursor:pointer;
+
+    background:var(--color-navy-deepest);
+
+    color:white;
+
+    font-family:var(--font-display);
+
+    font-weight:600;
+
+    transition:all var(--transition);
+}
+
+.login-card__submit:hover{
+
+    background:var(--color-blue-deep);
+}
+
+.login-card__submit:active{
+
+    transform:translateY(1px);
+}
+
+/* ==========================================================
+   FOOTNOTE
+========================================================== */
+
+.login-card__footnote{
+
+    margin-top:22px;
+
+    text-align:center;
+
+    font-size:12px;
+
+    color:#8B97A7;
+
+    line-height:1.6;
+}
+
+/* ==========================================================
+   RESPONSIVE
+========================================================== */
+
+/* ---------- Large Laptop ---------- */
+
+@media (max-width:1200px){
+
+    .login-visual{
+
+        flex:40%;
+    }
+
+    .login-visual__content{
+
+        padding:42px;
+    }
+}
+
+/* ---------- Tablet ---------- */
+
+@media (max-width:900px){
+
+    .login-page{
+
+        display:flex;
+    }
+
+    .login-visual{
+
+        flex:35%;
+    }
+
+    .login-form-panel{
+
+        padding:24px;
+    }
+
+    .login-card{
+
+        padding:36px;
+    }
+}
+
+/* ---------- Mobile ---------- */
+
+@media (max-width:768px){
+
+    .login-page{
+
+        position:relative;
+
+        display:flex;
+
+        justify-content:center;
+
+        align-items:center;
+
+        padding:24px;
+
+        background:
+            url("/metal_detector.png")
+            center center / cover
+            no-repeat;
+    }
+
+    .login-page::before{
+
+        content:"";
+
+        position:absolute;
+
+        inset:0;
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(9,65,121,.92),
+                rgba(14,79,143,.82)
+            );
+    }
+
+    .login-visual{
+
+        display:none;
+    }
+
+    .login-form-panel{
+
+        position:relative;
+
+        z-index:2;
+
+        width:100%;
+
+        padding:0;
+    }
+
+    .company-logo{
+
+        margin-bottom:22px;
+    }
+
+    .company-logo img{
+
+        width:min(220px,60vw);
+    }
+
+    .login-card{
+
+        width:min(100%,420px);
+
+        padding:32px 26px;
+
+        border-radius:16px;
+    }
+
+    .login-card__heading{
+
+        font-size:24px;
+    }
+
+    .login-card__subheading{
+
+        margin-bottom:24px;
+    }
+
+    .login-field input{
+
+        padding:13px 14px;
+    }
+}
+
+/* ---------- Small Phones ---------- */
+
+@media (max-width:420px){
+
+    .login-page{
+
+        padding:18px;
+    }
+
+    .login-card{
+
+        padding:28px 22px;
+    }
+
+    .company-logo img{
+
+        width:180px;
+    }
+
+    .login-card__heading{
+
+        font-size:22px;
+    }
+}

@@ -1,0 +1,43 @@
+.header {
+    height: 64px;
+    padding: 0 24px;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    background: #ffffff;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.header__logo {
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.header__right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+.header__user {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.header__empid {
+    font-weight: 600;
+}
+
+.header__role,
+.header__email {
+    font-size: 13px;
+    color: #666;
+}
+
+.header__logout {
+    padding: 8px 16px;
+    cursor: pointer;
+}
