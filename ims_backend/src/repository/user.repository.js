@@ -80,3 +80,17 @@ export async function clearPasswordToken(email) {
 
     return result.rowCount;
 }
+
+export async function findCredentialsByEmail(email) {
+    const query = `
+        SELECT
+            email,
+            password
+        FROM credentials
+        WHERE email = $1
+    `;
+
+    const result = await pool.query(query, [email]);
+
+    return result.rows[0];
+}

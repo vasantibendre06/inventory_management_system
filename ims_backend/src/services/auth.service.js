@@ -1,6 +1,6 @@
 import bcrypt from "bcrypt";
 import { findCredentialByEmail, updatePassword, getPasswordHash } from "../repository/credential.repository.js";
-import { findUserByEmail, touchLastLogin, savePasswordToken, getPasswordToken, clearPasswordToken  } from "../repository/user.repository.js";
+import { findUserByEmail, touchLastLogin, savePasswordToken, getPasswordToken, clearPasswordToken, findCredentialsByEmail  } from "../repository/user.repository.js";
 import generateLoginToken from "../utils/jwt/loginToken.js";
 import { generateOtp, hashOtp, verifyOtp } from "../utils/otp.js";
 import { PASSWORD_TOKEN_TYPE, AUTH } from "../constants/auth.constants.js";
@@ -82,21 +82,125 @@ export async function loginUser(email, password) {
 
 
 
-export async function resetPasswordService(email, newPassword) {
+export async function forgotPasswordService(email) {
+    const credential = await findCredentialByEmail(email);
+
+    if(!credential) {
+        throw new AppError(404, "Account not found.");
+    }
+
+    if(credential.must_reset_password) {
+        throw new AppError(400, "Please activate the account");
+    }  
+
+    const otp = generateOtp();
+    const otpHash = hashOtp(otp);
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+    await savePasswordToken(
+        email,
+        otpHash,
+        expiresAt,
+        PASSWORD_TOKEN_TYPE.RESET
+    );
+
+    await sendOtpEmail(
+        email,
+        otp
+    );
+
+    return {
+        success: true,
+        message: "OTP sent successfully.",
+    };
+}
+
+
+
+export async function resetPasswordService(email, otp, newPassword, confirmPassword) {
+    const credential = await findCredentialByEmail(email);
+
+    if(!credential) {
+        throw new AppError(404, "Account not found.");
+    }
+
+    if(credential.must_reset_password) {
+        throw new AppError(400, "Please activate the account");
+    }  
+    
+    if(newPassword !== confirmPassword) {
+        throw new AppError(400, "Passwords do not match.");
+    }
 
     validatePassword(newPassword);
 
-    const currentHash = await getPasswordHash(email);
+    const passwordToken = await getPasswordToken(email);
 
-    const isSamePassword = await bcrypt.compare(newPassword, currentHash);
-
-    if (isSamePassword) {
-        throw new AppError(400, "New password must be different from the current password.");
+    if (!passwordToken) {
+        throw new AppError(400, "OTP not found.");
     }
 
+    if (
+        passwordToken.password_token_type !==
+        PASSWORD_TOKEN_TYPE.RESET
+    ) {
+        throw new AppError(400, "Invalid OTP.");
+    }
+
+    if (
+        passwordToken.password_token_expires_at &&
+        passwordToken.password_token_expires_at < new Date()
+    ) {
+        throw new AppError(400, "OTP has expired.");
+    }
+    
+    // Verify OTP
+    const isValidOtp = verifyOtp(
+        otp,
+        passwordToken.password_token_hash
+    );
+
+    if (!isValidOtp) {
+        throw new AppError(400, "Incorrect OTP.");
+    }
+
+    const user = await findCredentialsByEmail(email);
+
+    // Compare plain text new password with stored hash
+    const isSamePassword = await bcrypt.compare(
+        newPassword,
+        user.password
+    );
+
+  if (isSamePassword) {
+    throw new Error(
+        "New password cannot be the same as your current password."
+    );
+}
+
+    // Hash new password
     const hashedPassword = await bcrypt.hash(newPassword, 12);
 
-    await updatePassword(email, hashedPassword);
+    // Update password
+    const updated = await updatePassword(
+        email,
+        hashedPassword
+    );
+
+    if (!updated) {
+        throw new AppError(
+            500,
+            "Failed to reset the new password."
+        );
+    }
+
+    // Clear OTP
+    await clearPasswordToken(email);
+
+    return {
+        success: true,
+        message: "Password reset successfully.",
+    };
 }
 
 

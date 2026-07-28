@@ -1,4 +1,4 @@
-import { loginUser, resetPasswordService, activateAccountService } from "../services/auth.service.js";
+import { loginUser, resetPasswordService, activateAccountService, forgotPasswordService } from "../services/auth.service.js";
 import {loginCookieOptions, resetCookieOptions} from "../config/cookieOptions.js";
 
 export async function login(req, res) {
@@ -24,11 +24,11 @@ export async function login(req, res) {
             return res.status(200).json({
                 success: true,
                 mustResetPassword: true,
+                email: result.email,
                 message: "Please reset your password to continue.",
             });
         }
 
-        //console.log("Cookie value:", result.token);
         res.cookie("token", result.token, loginCookieOptions);
 
         return res.status(200).json({
@@ -50,35 +50,52 @@ export async function login(req, res) {
 
 export async function resetPassword(req, res) {
     try {
-        const { newPassword, confirmPassword } = req.body;
+        const { email, otp, newPassword, confirmPassword } = req.body;
 
-        if(!newPassword || !confirmPassword) {
+        if(!email || !otp || !newPassword || !confirmPassword) {
             return res.status(400).json({
                 success: false,
-                message: "Both password fields are required."
+                message: "All fields are required.",
             });           
         }
-        if (newPassword !== confirmPassword) {
+
+        const result = await resetPasswordService(
+            email,
+            otp,
+            newPassword,
+            confirmPassword
+        );
+
+        return res.status(200).json(result);
+
+    } catch (error) {
+        const statusCode = error.statusCode || 500;
+
+        return res.status(statusCode).json({
+            success: false,
+            message: error.message || "Something went wrong."
+        });
+    }
+}
+
+
+export async function forgotPassword(req, res) {
+    try {
+        const { email } = req.body;
+
+        if (!email) {
             return res.status(400).json({
                 success: false,
-                message: "Passwords do not match."
+                message: "Email is required."
             });
         }
 
-        const email = req.user.email;
-
-        await resetPasswordService(email, newPassword);
-
-        res.clearCookie(
-            "resetToken",
-            resetCookieOptions
-        );
+        await forgotPasswordService(email);
 
         return res.status(200).json({
             success: true,
-            message: "Password updated successfully. Please log in again."
+            message: "OTP sent successfully."
         });
-
     } catch (error) {
         const statusCode = error.statusCode || 500;
 
